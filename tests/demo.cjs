@@ -13,12 +13,16 @@ const assert=require('node:assert/strict');
  const approve=page.locator('#approveImport');
  const preview=async type=>{await page.selectOption('#importExample',type);await page.locator('#simulateImport').click();};
  assert.equal((await total())[0],'—');
- await preview('valid');assert.equal(await page.locator('#previewRows tr').count(),4);assert.equal((await total())[0],'—');assert.equal(await approve.isEnabled(),true);
- await approve.click();const original=await total();assert.equal(await approve.isEnabled(),false);assert.equal(await page.locator('#importHistory tr').count(),1);
- await preview('valid');await approve.click();assert.deepEqual(await total(),original);assert.equal(await page.getByRole('cell',{name:'Ersatt',exact:true}).count(),1);
+ assert.match(await page.locator('.import-steps').innerText(),/Välj underlag → Förhandsgranska → Kontrollera → Godkänn/);
+ assert.equal(await page.locator('.import-actions #importExample').count(),1);
+ assert.equal(await page.locator('.import-actions #simulateImport').innerText(),'Förhandsgranska import');
+ const selectBox=await page.locator('#importExample').boundingBox(), previewBox=await page.locator('#simulateImport').boundingBox();assert(Math.abs(selectBox.y-previewBox.y)<5);assert(previewBox.x>selectBox.x);
+ await preview('valid');assert.equal(await page.locator('#previewRows tr').count(),4);assert.equal((await total())[0],'—');assert.equal(await approve.isEnabled(),true);assert.match(await page.locator('#workflowStatus').innerText(),/ännu inte godkänd/);
+ await approve.click();const original=await total();assert.match(await page.locator('#workflowStatus').innerText(),/Godkänd – import #1/);assert.match(await page.locator('#importConfirmation').innerText(),/import #1 gäller nu för januari–September 2026/);assert((await page.locator('#importConfirmation').innerText()).includes(original[0]));assert.equal(await approve.isEnabled(),false);assert.equal(await page.locator('#importHistory tr').count(),1);
+ await preview('valid');await approve.click();assert.deepEqual(await total(),original);assert.equal(await page.locator('#importHistory .status-badge.replaced').count(),1);
  await preview('revised');await approve.click();const revised=await total();assert.notEqual(revised[0],original[0]);assert.deepEqual(revised.filter((_,i)=>[1,2,4].includes(i)),original.filter((_,i)=>[1,2,4].includes(i)));
- for(const type of ['invalid','duplicate']){await preview(type);assert.equal(await approve.isDisabled(),true);assert((await page.locator('#importErrors li').count())>0);await page.evaluate(()=>approveImport());assert.deepEqual(await total(),revised);}
- await preview('valid');await page.selectOption('#reportMonth','7');assert.equal(await page.locator('#importPreview').isVisible(),false);await page.evaluate(()=>approveImport());assert.equal((await total())[0],'—');await preview('valid');await approve.click();await page.selectOption('#reportMonth','8');assert.deepEqual(await total(),revised);
+ for(const type of ['invalid','duplicate']){await preview(type);assert.equal(await approve.isDisabled(),true);assert((await page.locator('#importErrors li').count())>0);assert.match(await page.locator('#workflowStatus').innerText(),/Stoppad/);if(type==='invalid'){assert.equal(await page.locator('#importErrors > li').count(),4);assert((await page.locator('#importErrors > li').first().locator('li').count())>1);}assert.match(await page.locator('#importConfirmation').innerText(),/import #3 gäller nu/);await page.evaluate(()=>approveImport());assert.deepEqual(await total(),revised);}
+ await preview('valid');await page.selectOption('#reportMonth','7');assert.equal(await page.locator('#importPreview').isVisible(),false);await page.evaluate(()=>approveImport());assert.equal((await total())[0],'—');await preview('valid');await approve.click();await page.selectOption('#reportMonth','8');assert.deepEqual(await total(),revised);assert.match(await page.locator('#importConfirmation').innerText(),/import #3 gäller nu/);assert.match(await page.locator('#importHistory .replaced').first().innerText(),/räknas inte med/);
  const checks=await page.evaluate(()=>{
   let count=0;for(let month=0;month<12;month++){
    reportMonth.value=String(month);pendingImport={month,rows:makeExample(month,'valid')};approveImport();

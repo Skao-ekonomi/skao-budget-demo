@@ -15,7 +15,7 @@ Detta är inte en ersättning för den fullständiga Django-appen.
 
 Fliken visar fem jämförelsekolumner för vald rapportmånad. Perioden är januari till och med vald månad, reståret är återstående månader. Prognos = ackumulerat utfall + budget reståret. Intäkter är positiva, kostnader negativa och summan visar resultat.
 
-Välj rapportmånad, fiktivt underlag och **Förhandsgranska fiktiv import**. Granska radantal, intäkter, kostnader, netto och fellista innan **Godkänn simulerad import**. Giltigt underlag och korrigerat utfall demonstrerar ersättning; felaktiga koder/kombinationer och dubbletter demonstrerar spärrat godkännande.
+Välj rapportmånad, fiktivt underlag och **Förhandsgranska import**. Granska radantal, intäkter, kostnader, netto och fellista innan **Godkänn simulerad import**. Giltigt underlag och korrigerat utfall demonstrerar ersättning; felaktiga koder/kombinationer och dubbletter demonstrerar spärrat godkännande.
 
 Varje import är ett komplett ackumulerat utfall från januari till vald månad i det fiktiva rapportåret 2026. Den ersätter hela tidigare utfallet för samma period; utelämnade rader får 0 kr. Olika rapportmånader hålls separata och adderas aldrig. Återval av en godkänd period visar dess senaste utfall. Förhandsgranskning ogiltigförklaras vid byte av månad eller exempel.
 
@@ -32,3 +32,5 @@ Rapportens beloppsrubriker är Utfall, Budget, Restbudget, Prognos och Helårsbu
 ## Funktionstester
 
 Med den lokala servern igång och Node.js, Playwright samt Chromium tillgängliga: kör `node tests/demo.cjs`. `DEMO_URL` och `CHROMIUM_PATH` kan ange annan lokal testadress respektive Chromium-sökväg. Testet verifierar förhandsgranskning, valideringsfel, ersättning utan dubbelräkning, periodisolering, historik, oförändrade budgetuppgifter, rapportformler på alla nivåer och månader, fördjupning, mobilvy och återställning vid omladdning. Playwright behövs bara för tester, inte för att använda demon.
+
+Importflödet visar stegen **Välj underlag → Förhandsgranska → Kontrollera → Godkänn**. Underlagsval och förhandsgranskningsknapp ligger tillsammans. Fellistan grupperas per rad; text och färg skiljer stoppad import från godkända kontroller och godkänd import. Bekräftelsen visar aktuell import, period, intäkter, kostnader och netto. Historiken visar underlag och markerar aktuell version per period samt vilken import som ersatt äldre versioner.
