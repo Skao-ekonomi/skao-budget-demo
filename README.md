@@ -20,3 +20,5 @@ Välj rapportmånad och klicka på **Simulera import av fiktivt utfall**. Knappe
 Klicka på rapportens rader: Hela Skao → kostnadsställe → projekt → konto. Sökvägens knappar tar dig tillbaka. Tabellen behåller alla fem beloppskolumner sida vid sida och kan rullas i sidled på små skärmar.
 
 För lokal utveckling: `python3 -m http.server 8000 --bind 127.0.0.1` från projektmappen. Ingen installation eller byggprocess krävs.
+
+Rapportens beloppsrubriker är Utfall, Budget, Restbudget, Prognos och Helårsbudget. Budget + Restbudget = Helårsbudget på varje rapportnivå. DEMO-3010 · Kursintäkter har hela sin fiktiva årsbudget, 3 000 kr, i september och 0 kr övriga månader. Augusti visar därför Budget 0 kr och Restbudget 3 000 kr; september visar Budget 3 000 kr och Restbudget 0 kr. Fördjupningen använder samma månadsbelopp som översikten.
