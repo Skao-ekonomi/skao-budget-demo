@@ -16,15 +16,28 @@
 <section id="forecast" class="hidden"><div class="panel">
 <h2>Utfall och prognos · fiktiv rapport</h2>
 <p>Belopp i kronor. Intäkter visas som positiva och kostnader som negativa belopp. Perioden omfattar januari till och med rapportmånaden; reståret är månaderna därefter.</p>
-<div class="report-controls"><label for="reportMonth">Rapportmånad <select id="reportMonth"></select></label><button type="button" id="simulateImport">Simulera import av fiktivt utfall</button></div>
+<div class="report-controls"><label for="reportMonth">Rapportmånad <select id="reportMonth"></select></label><button type="button" id="simulateImport">Förhandsgranska fiktiv import</button></div>
 <p id="importStatus" role="status"></p>
-<details><summary>Så är framtida import tänkt att fungera</summary><p>En framtida filimport ska läsa ackumulerat utfall från januari till vald rapportmånad med fälten rapportår, rapportmånad, kostnadsställe, projekt, konto och ackumulerat belopp. Exempel: DEMO-100, DEMO-BET, DEMO-3010. Koder, period och belopp behöver kontrolleras före import. En ny import för samma period ska ersätta tidigare utfall, inte adderas till det.</p><p>Knappen ovan laddar endast fasta, fiktiva exempel för vald period. Ingen fil läses, inget skickas och inget sparas. Använd inga verkliga budget- eller bokföringsuppgifter i denna offentliga demo.</p></details>
+<div class="panel" aria-labelledby="simulationHeading">
+<h3 id="simulationHeading">Fortnox månadsimport · ENDAST SIMULERING</h3>
+<p>Fiktivt rapportår: 2026. Ingen Fortnox-anslutning, filuppladdning eller beständig datalagring används. Godkännande ändrar endast demonstrationsutfallet i denna öppna sida. Budget och bokföring påverkas aldrig. Omladdning tömmer simuleringen och historiken.</p>
+<div class="report-controls"><label for="importExample">Fiktivt importunderlag <select id="importExample"><option value="valid">Giltiga exempelrader</option><option value="revised">Korrigerat utfall (ersättning)</option><option value="invalid">Felaktiga koder och kombinationer</option><option value="duplicate">Dubblett av samma kontorad</option></select></label></div>
+<div id="importPreview" hidden>
+<h4>Förhandsgranskning</h4><p id="previewSummary" role="status"></p>
+<p id="replacementNotice"></p><ul id="importErrors" aria-label="Fellista"></ul>
+<div class="report-scroll"><table><caption>Fiktiva ackumulerade rader, januari–vald rapportmånad</caption><thead><tr><th>Rad</th><th>Kostnadsställe</th><th>Projekt</th><th>Konto</th><th class="num">Utfall, kr</th></tr></thead><tbody id="previewRows"></tbody></table></div>
+<div class="report-controls"><button type="button" id="approveImport" disabled>Godkänn simulerad import</button></div>
+</div>
+<h4>Historik · endast denna sidvisning</h4><p>Visar godkända simuleringar. Ersatta versioner finns kvar i historiken men räknas inte in i rapporten.</p>
+<div class="report-scroll"><table><thead><tr><th>Import</th><th>Period 2026</th><th>Rader</th><th class="num">Netto</th><th>Status</th></tr></thead><tbody id="importHistory"><tr><td colspan="5">Inga godkända simuleringar ännu.</td></tr></tbody></table></div>
+</div>
+<details><summary>Så är framtida import tänkt att fungera</summary><p>En framtida filimport ska läsa ackumulerat utfall från januari till vald rapportmånad med fälten rapportår, rapportmånad, kostnadsställe, projekt, konto och ackumulerat belopp. Exempel: DEMO-100, DEMO-BET, DEMO-3010. Koder, period och belopp behöver kontrolleras före import. En ny import för samma period ska ersätta tidigare utfall, inte adderas till det.</p><p>Knappen ovan förhandsgranskar fasta, fiktiva exempel för vald period. Godkännandet är ett separat steg. Ingen fil läses, inget skickas och inget sparas. Använd inga verkliga budget- eller bokföringsuppgifter i denna offentliga demo.</p></details>
 <p>Utfall är ackumulerat till vald månad. Budget avser januari till vald månad och Restbudget återstående månader. Prognos = Utfall + Restbudget. Helårsbudget = Budget + Restbudget.</p>
 <p class="muted">Fiktiv månadsfördelning: hela intäktsbudgeten på DEMO-3010 · Kursintäkter ligger i september (3 000 kr); övriga månader har 0 kr. Därför visar september Budget 3 000 kr och Restbudget 0 kr även på kontonivå.</p>
 <p>Klicka på en rad för att gå från hela Skao till kostnadsställe, projekt och konto. Använd sökvägen för att gå tillbaka.</p>
 <nav id="reportPath" class="breadcrumbs" aria-label="Rapportens sökväg"></nav>
 <h3 id="reportHeading" tabindex="-1"></h3>
-<div class="report-scroll" role="region" aria-label="Rapporttabell, rulla i sidled på mindre skärmar" tabindex="0"><table class="report-table"><colgroup><col><col class="amount" span="5"></colgroup><caption id="reportCaption"></caption><thead><tr><th scope="col">Rapportnivå</th><th scope="col" class="num">Utfall</th><th scope="col" class="num">Budget</th><th scope="col" class="num">Restbudget</th><th scope="col" class="num">Prognos</th><th scope="col" class="num">Helårsbudget</th></tr></thead><tbody id="reportRows"></tbody><tfoot id="reportTotal"></tfoot></table></div>
+<div class="report-scroll" role="region" aria-label="Rapporttabell, rulla i sidled på mindre skärmar" tabindex="0"><table class="report-table"><caption id="reportCaption"></caption><colgroup><col><col class="amount" span="5"></colgroup><thead><tr><th scope="col">Rapportnivå</th><th scope="col" class="num">Utfall</th><th scope="col" class="num">Budget</th><th scope="col" class="num">Restbudget</th><th scope="col" class="num">Prognos</th><th scope="col" class="num">Helårsbudget</th></tr></thead><tbody id="reportRows"></tbody><tfoot id="reportTotal"></tfoot></table></div>
 <p class="muted">Helårsbudgeten är samma fiktiva budget som i övriga flikar: intäkter 3 000 kr, kostnader 4 000 kr och resultat −1 000 kr. Prognosen använder budget för återstående månader utan andra justeringar.</p>
 </div></section>
 </main><footer>Skao Budget · Statisk demonstrationssida · Inloggning, import och lagring är inte aktiverade</footer>
@@ -47,13 +60,14 @@ function reportAmounts(node){
  if(node.children)return node.children.map(reportAmounts).reduce((a,b)=>a.map((v,i)=>v+b[i]),[0,0,0,0,0]);
  const end=Number(reportMonth.value)+1;
  const sum=values=>values.reduce((a,b)=>a+b,0);
- const actual=sum(node.actual.slice(0,end)),period=sum(node.budget.slice(0,end)),remaining=sum(node.budget.slice(end));
+ const snapshot=importSnapshots.get(Number(reportMonth.value));
+ const actual=snapshot?.amounts.get(node)??0,period=sum(node.budget.slice(0,end)),remaining=sum(node.budget.slice(end));
  return [actual,period,remaining,actual+remaining,period+remaining];
 }
 function reportCells(node){return reportAmounts(node).map((v,i)=>{const cell=document.createElement('td');cell.className='num';cell.textContent=importedMonth===null&&(i===0||i===3)?'—':fmt(v);return cell;});}
 function renderReport(){
  const node=reportPath[reportPath.length-1];
- document.getElementById('importStatus').textContent=importedMonth===null?'Inget utfall laddat för januari–'+names[Number(reportMonth.value)]+'. Simulera import för att se utfall och prognos.':'Fiktivt ackumulerat utfall laddat för januari–'+names[importedMonth]+'. En ny simulering ersätter samma exempeldata.';
+ document.getElementById('importStatus').textContent=importedMonth===null?'Inget utfall laddat för januari–'+names[Number(reportMonth.value)]+'. Förhandsgranska och godkänn en simulering för att se utfall och prognos.':'Fiktivt ackumulerat utfall laddat för januari–'+names[importedMonth]+'. En ny simulering ersätter samma exempeldata.';
  const path=document.getElementById('reportPath');path.replaceChildren();
  reportPath.forEach((item,i)=>{const button=document.createElement('button');button.type='button';button.textContent=item.label;if(i===reportPath.length-1)button.setAttribute('aria-current','location');button.addEventListener('click',()=>{reportPath=reportPath.slice(0,i+1);renderReport();document.getElementById('reportHeading').focus();});path.appendChild(button);});
  document.getElementById('reportHeading').textContent=node.label;
@@ -66,7 +80,6 @@ function renderReport(){
  row.append(label,...reportCells(child));body.appendChild(row);});
  const total=document.createElement('tr');const label=document.createElement('th');label.scope='row';label.textContent='Summa / resultat';total.append(label,...reportCells(node));document.getElementById('reportTotal').replaceChildren(total);
 }
-reportMonth.addEventListener('change',()=>{importedMonth=null;renderReport();});
-document.getElementById('simulateImport').addEventListener('click',()=>{importedMonth=Number(reportMonth.value);renderReport();});
-renderReport();
-</script></body></html>
+
+</script>
+<script src="import-simulation.js"></script></body></html>
