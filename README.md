@@ -38,3 +38,5 @@ Importflödet visar stegen **Välj underlag → Förhandsgranska → Kontrollera
 Knappen **Importera utfall (demo)** leder till den befintliga importsimuleringen. Den nya månadens ackumulerade utfall används i stället för föregående månads ackumulerade utfall i rapporten; perioderna adderas aldrig. Äldre perioder kan fortfarande väljas separat.
 
 Rapporten har även en sjätte beloppskolumn, **Avvikelse = Prognos − Helårsbudget**, på alla nivåer och summarader. Negativa värden är röda, positiva gröna med plustecken och noll neutralt. Saknad prognos ger streck även i Avvikelse. Tabellen kan rullas i sidled på mobil.
+
+Den sjunde kolumnen, **Avvikelse %**, visar (Prognos − Helårsbudget) / absolutbeloppet av Helårsbudget × 100 med högst en decimal. Saknad prognos eller nollbudget visas som —. Negativt är rött, positivt grönt och noll neutralt.

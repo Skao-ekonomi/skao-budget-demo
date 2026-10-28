@@ -7,7 +7,7 @@ const assert=require('node:assert/strict');
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.DEMO_URL||'http://127.0.0.1:8000/');
  for(const id of ['overview','centers','projects','months','forecast']){await page.locator(`[data-tab="${id}"]`).click();assert.equal(await page.locator('section:visible').getAttribute('id'),id);}
- assert.deepEqual(await page.locator('.report-table thead .num').allTextContents(),['Utfall perioden','Budget perioden','Budget reståret','Prognos','Helårsbudget','Avvikelse']);
+ assert.deepEqual(await page.locator('.report-table thead .num').allTextContents(),['Utfall perioden','Budget perioden','Budget reståret','Prognos','Helårsbudget','Avvikelse','Avvikelse %']);
  await page.getByRole('button',{name:'Importera utfall (demo)',exact:true}).click();assert.equal(await page.locator('#importExample').evaluate(e=>e===document.activeElement),true);
  const baseline=await page.evaluate(()=>JSON.stringify(reportRoot));
  const total=()=>page.locator('#reportTotal td').allTextContents();
@@ -39,15 +39,18 @@ const assert=require('node:assert/strict');
  const historyBefore=await page.locator('#importHistory').innerText();
  const varianceChecks=await page.evaluate(()=>{
   let checked=0;
-  const number=text=>Number(text.replace(/[^0-9−+.-]/g,'').replace('−','-'));
-  function checkRow(row){const cells=[...row.querySelectorAll('td')];if(cells.length!==6)throw Error('Column count');if(cells[3].textContent==='—'){if(cells[5].textContent!=='—')throw Error('Missing variance');checked++;return;}if(number(cells[5].textContent)!==number(cells[3].textContent)-number(cells[4].textContent))throw Error('Variance');checked++;}
+  const number=text=>Number(text.replace(/[^0-9−+.,-]/g,'').replace('−','-').replace(',','.'));
+  function checkRow(row){const cells=[...row.querySelectorAll('td')];if(cells.length!==7)throw Error('Column count');if(cells[3].textContent==='—'){if(cells[5].textContent!=='—'||cells[6].textContent!=='—')throw Error('Missing variance');checked++;return;}if(number(cells[5].textContent)!==number(cells[3].textContent)-number(cells[4].textContent))throw Error('Variance');const budget=number(cells[4].textContent);if(budget===0){if(cells[6].textContent!=='—')throw Error('Zero budget');}else if(Math.abs(number(cells[6].textContent)-number(cells[5].textContent)/Math.abs(budget)*100)>.051)throw Error('Percent');checked++;}
   function visit(node,path){reportPath=path;renderReport();document.querySelectorAll('#reportRows tr,#reportTotal tr').forEach(checkRow);if(node.children)node.children.forEach(child=>visit(child,[...path,child]));}
   const root={label:'Rapport',children:[reportRoot]};visit(root,[root]);
   for(const value of [-100,0,100]){const fake={budget:Array(12).fill(0)};const snapshot=importSnapshots.get(Number(reportMonth.value));snapshot.amounts.set(fake,value);const cell=reportCells(fake)[5];snapshot.amounts.delete(fake);if(cell.classList.contains('variance-negative')!==(value<0)||cell.classList.contains('variance-positive')!==(value>0))throw Error('Variance color');}
+  for(const [budget,actual,expected,sign] of [[-1000,-1320,'−32 %','negative'],[-1000,-680,'+32 %','positive'],[-1000,-1000,'0 %',''],[0,100,'—','']]){const fake={budget:[budget,...Array(11).fill(0)]};const snapshot=importSnapshots.get(Number(reportMonth.value));snapshot.amounts.set(fake,actual);const cell=reportCells(fake)[6];snapshot.amounts.delete(fake);if(cell.textContent!==expected)throw Error('Percent example: '+cell.textContent);if(cell.classList.contains('variance-negative')!==(sign==='negative')||cell.classList.contains('variance-positive')!==(sign==='positive'))throw Error('Percent color');}
   const saved=importedMonth;importedMonth=null;visit(root,[root]);if([...document.querySelectorAll('#reportRows tr,#reportTotal tr')].some(r=>r.lastElementChild.textContent!=='—'))throw Error('Missing forecast');importedMonth=saved;reportPath=[root];renderReport();return checked;
  });assert(varianceChecks>20);assert.equal(await page.locator('#importHistory').innerText(),historyBefore);
+ await page.setViewportSize({width:1366,height:900});
  const layout=await page.locator('.report-table').evaluate(e=>({width:e.clientWidth,available:e.parentElement.clientWidth}));assert(layout.width<=layout.available);
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.equal(await page.locator('.report-scroll').last().evaluate(e=>e.scrollWidth>e.clientWidth),true);
+ const noOverlap=await page.locator('.report-table').evaluate(table=>[...table.querySelectorAll('th,td')].every(cell=>cell.scrollWidth<=cell.clientWidth));assert(noOverlap);
  assert.equal(await page.locator('input[type=file]').count(),0);assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
  await page.reload();await page.locator('[data-tab="forecast"]').click();assert.equal((await total())[0],'—');assert.match(await page.locator('#importHistory').innerText(),/Inga godkända/);assert.deepEqual(errors,[]);
  console.log('PASS: preview, validation, blocked errors, atomic replacement, period isolation, history, 120 report checks, unchanged budgets, drill-down, mobile, reload reset.');
