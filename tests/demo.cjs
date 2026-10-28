@@ -7,17 +7,17 @@ const assert=require('node:assert/strict');
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.DEMO_URL||'http://127.0.0.1:8000/');
  for(const id of ['overview','centers','projects','months','forecast']){await page.locator(`[data-tab="${id}"]`).click();assert.equal(await page.locator('section:visible').getAttribute('id'),id);}
- assert.deepEqual(await page.locator('.report-table thead .num').allTextContents(),['Utfall perioden','Budget perioden','Budget reståret','Prognos','Helårsbudget']);
+ assert.deepEqual(await page.locator('.report-table thead .num').allTextContents(),['Utfall perioden','Budget perioden','Budget reståret','Prognos','Helårsbudget','Avvikelse']);
  await page.getByRole('button',{name:'Importera utfall (demo)',exact:true}).click();assert.equal(await page.locator('#importExample').evaluate(e=>e===document.activeElement),true);
  const baseline=await page.evaluate(()=>JSON.stringify(reportRoot));
  const total=()=>page.locator('#reportTotal td').allTextContents();
  const approve=page.locator('#approveImport');
  const preview=async type=>{await page.selectOption('#importExample',type);await page.locator('#simulateImport').click();};
- assert.equal((await total())[0],'—');
+ assert.equal((await total())[0],'—');assert.equal((await total())[5],'—');
  assert.match(await page.locator('.import-steps').innerText(),/Välj underlag → Förhandsgranska → Kontrollera → Godkänn/);
  assert.equal(await page.locator('.import-actions #importExample').count(),1);
  assert.equal(await page.locator('.import-actions #simulateImport').innerText(),'Förhandsgranska import');
- const selectBox=await page.locator('#importExample').boundingBox(), previewBox=await page.locator('#simulateImport').boundingBox();assert(Math.abs(selectBox.y-previewBox.y)<5);assert(previewBox.x>selectBox.x);
+ const adjacent=await page.locator('.import-actions').evaluate(e=>{const select=e.querySelector('select'),button=e.querySelector('button');return button.offsetLeft>select.offsetLeft&&Math.abs(button.offsetTop-select.offsetTop)<5;});assert(adjacent);
  await preview('valid');assert.equal(await page.locator('#previewRows tr').count(),4);assert.equal((await total())[0],'—');assert.equal(await approve.isEnabled(),true);assert.match(await page.locator('#workflowStatus').innerText(),/ännu inte godkänd/);
  await approve.click();const original=await total();assert.match(await page.locator('#workflowStatus').innerText(),/Godkänd – import #1/);assert.match(await page.locator('#importConfirmation').innerText(),/import #1 gäller nu för januari–September 2026/);assert((await page.locator('#importConfirmation').innerText()).includes(original[0]));assert.equal(await approve.isEnabled(),false);assert.equal(await page.locator('#importHistory tr').count(),1);
  await preview('valid');await approve.click();assert.deepEqual(await total(),original);assert.equal(await page.locator('#importHistory .status-badge.replaced').count(),1);
@@ -35,6 +35,18 @@ const assert=require('node:assert/strict');
   return count;
  });assert.equal(checks,120);assert.equal(await page.evaluate(()=>JSON.stringify(reportRoot)),baseline);
  await page.selectOption('#reportMonth','8');for(let i=0;i<4;i++)await page.locator('#reportRows button').first().click();assert.match(await page.locator('#reportRows').innerText(),/kontonivå/);
+
+ const historyBefore=await page.locator('#importHistory').innerText();
+ const varianceChecks=await page.evaluate(()=>{
+  let checked=0;
+  const number=text=>Number(text.replace(/[^0-9−+.-]/g,'').replace('−','-'));
+  function checkRow(row){const cells=[...row.querySelectorAll('td')];if(cells.length!==6)throw Error('Column count');if(cells[3].textContent==='—'){if(cells[5].textContent!=='—')throw Error('Missing variance');checked++;return;}if(number(cells[5].textContent)!==number(cells[3].textContent)-number(cells[4].textContent))throw Error('Variance');checked++;}
+  function visit(node,path){reportPath=path;renderReport();document.querySelectorAll('#reportRows tr,#reportTotal tr').forEach(checkRow);if(node.children)node.children.forEach(child=>visit(child,[...path,child]));}
+  const root={label:'Rapport',children:[reportRoot]};visit(root,[root]);
+  for(const value of [-100,0,100]){const fake={budget:Array(12).fill(0)};const snapshot=importSnapshots.get(Number(reportMonth.value));snapshot.amounts.set(fake,value);const cell=reportCells(fake)[5];snapshot.amounts.delete(fake);if(cell.classList.contains('variance-negative')!==(value<0)||cell.classList.contains('variance-positive')!==(value>0))throw Error('Variance color');}
+  const saved=importedMonth;importedMonth=null;visit(root,[root]);if([...document.querySelectorAll('#reportRows tr,#reportTotal tr')].some(r=>r.lastElementChild.textContent!=='—'))throw Error('Missing forecast');importedMonth=saved;reportPath=[root];renderReport();return checked;
+ });assert(varianceChecks>20);assert.equal(await page.locator('#importHistory').innerText(),historyBefore);
+ const layout=await page.locator('.report-table').evaluate(e=>({width:e.clientWidth,available:e.parentElement.clientWidth}));assert(layout.width<=layout.available);
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.equal(await page.locator('.report-scroll').last().evaluate(e=>e.scrollWidth>e.clientWidth),true);
  assert.equal(await page.locator('input[type=file]').count(),0);assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
  await page.reload();await page.locator('[data-tab="forecast"]').click();assert.equal((await total())[0],'—');assert.match(await page.locator('#importHistory').innerText(),/Inga godkända/);assert.deepEqual(errors,[]);

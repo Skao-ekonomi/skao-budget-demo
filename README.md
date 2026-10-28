@@ -36,3 +36,5 @@ Med den lokala servern igång och Node.js, Playwright samt Chromium tillgänglig
 Importflödet visar stegen **Välj underlag → Förhandsgranska → Kontrollera → Godkänn**. Underlagsval och förhandsgranskningsknapp ligger tillsammans. Fellistan grupperas per rad; text och färg skiljer stoppad import från godkända kontroller och godkänd import. Bekräftelsen visar aktuell import, period, intäkter, kostnader och netto. Historiken visar underlag och markerar aktuell version per period samt vilken import som ersatt äldre versioner.
 
 Knappen **Importera utfall (demo)** leder till den befintliga importsimuleringen. Den nya månadens ackumulerade utfall används i stället för föregående månads ackumulerade utfall i rapporten; perioderna adderas aldrig. Äldre perioder kan fortfarande väljas separat.
+
+Rapporten har även en sjätte beloppskolumn, **Avvikelse = Prognos − Helårsbudget**, på alla nivåer och summarader. Negativa värden är röda, positiva gröna med plustecken och noll neutralt. Saknad prognos ger streck även i Avvikelse. Tabellen kan rullas i sidled på mobil.
