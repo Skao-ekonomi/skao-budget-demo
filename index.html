@@ -75,7 +75,7 @@ function renderReport(){
  const path=document.getElementById('reportPath');path.replaceChildren();
  reportPath.forEach((item,i)=>{const button=document.createElement('button');button.type='button';button.textContent=item.label;if(i===reportPath.length-1)button.setAttribute('aria-current','location');button.addEventListener('click',()=>{reportPath=reportPath.slice(0,i+1);renderReport();document.getElementById('reportHeading').focus();});path.appendChild(button);});
  document.getElementById('reportHeading').textContent=node.label;
- document.getElementById('reportCaption').textContent='Fiktiv rapport · januari–'+names[Number(reportMonth.value)]+' · kr';
+ document.getElementById('reportCaption').textContent='Fiktiv rapport · Januari–'+names[Number(reportMonth.value)]+' · kr';
  const body=document.getElementById('reportRows');body.replaceChildren();
  // Start with the whole organisation, then reveal one level on each click.
  const rows=node.children||[node];
