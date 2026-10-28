@@ -42,3 +42,5 @@ Rapporten har även en sjätte beloppskolumn, **Avvikelse = Prognos − Helårsb
 Den sjunde kolumnen, **Avvikelse %**, visar (Prognos − Helårsbudget) / absolutbeloppet av Helårsbudget × 100 med högst en decimal. Saknad prognos eller nollbudget visas som —. Negativt är rött, positivt grönt och noll neutralt.
 
 Rapportens detaljrader sorteras automatiskt efter Avvikelse i kronor, mest negativ först, sedan noll och positiva värden. Rader utan prognos/avvikelse ligger sist. Summaraden ligger alltid separat längst ned. Sorteringen gäller kostnadsställen, projekt och konton och ändrar inte budgetuppgifter eller importhistorik.
+
+Sökfältet **Sök kostnadsställe, projekt eller konto** söker i hela den fiktiva rapporthierarkin på nummer och namn oavsett stora/små bokstäver. Träffar visar nivå och sökväg och öppnar rätt rapportnivå. **Rensa sökning** tömmer träfflistan utan att ändra vald rapportnivå. Sökningen filtrerar inte rapporttabellen och påverkar inga belopp, summarader eller importer.

@@ -75,6 +75,23 @@ const assert=require('node:assert/strict');
  const layout=await page.locator('.report-table').evaluate(e=>({width:e.clientWidth,available:e.parentElement.clientWidth}));assert(layout.width<=layout.available);
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.equal(await page.locator('.report-scroll').last().evaluate(e=>e.scrollWidth>e.clientWidth),true);
  const noOverlap=await page.locator('.report-table').evaluate(table=>[...table.querySelectorAll('th,td')].every(cell=>cell.scrollWidth<=cell.clientWidth));assert(noOverlap);
+ for(const width of [1366,390]){
+  await page.setViewportSize({width,height:900});
+  const search=page.getByRole('searchbox',{name:'Sök kostnadsställe, projekt eller konto'});
+  for(const [query,label] of [['100','DEMO-100 · Kurser'],['kUrSeR','DEMO-100 · Kurser'],['bet','DEMO-BET · Avgiftsbelagd kurs'],['aVgIfTsBeLaGd','DEMO-BET · Avgiftsbelagd kurs'],['3010','DEMO-3010 · Kursintäkter'],['kUrSiNtÄkTeR','DEMO-3010 · Kursintäkter']]){
+   const summary=await total(),history=await page.locator('#importHistory').innerText(),rows=await page.locator('#reportRows').innerText();
+   await search.fill(query);assert((await page.locator('#searchResults button').count())>0);assert.deepEqual(await total(),summary);assert.equal(await page.locator('#reportRows').innerText(),rows);
+   await page.locator('#searchResults button').filter({hasText:label}).click();assert.equal(await page.locator('#reportHeading').innerText(),label);
+   const expected=await page.evaluate(()=>reportCells(reportPath.at(-1)).map(cell=>cell.textContent));assert.deepEqual(await total(),expected);assert.equal(await page.locator('#importHistory').innerText(),history);
+   await page.getByRole('button',{name:'Rensa sökning',exact:true}).click();assert.equal(await search.inputValue(),'');assert.equal(await page.locator('#searchResults button').count(),0);assert.equal(await search.evaluate(e=>e===document.activeElement),true);
+  }
+  const summary=await total();await search.fill('finns-inte-xyz');assert.equal(await page.locator('#searchStatus').innerText(),'Inga träffar');assert.deepEqual(await total(),summary);
+  await search.fill('   ');assert.equal(await page.locator('#searchResults button').count(),0);assert.equal(await page.locator('#searchStatus').innerText(),'');
+  await search.fill('kostnader');assert.equal(await page.locator('#searchResults button').count(),3);await page.locator('#searchResults button').first().press('Enter');assert.match(await page.locator('#reportRows').innerText(),/kontonivå/);
+  await page.getByRole('button',{name:'Rensa sökning',exact:true}).click();await page.locator('#reportPath button').filter({hasText:'Hela Skao'}).click();assert.equal(await page.locator('#reportHeading').innerText(),'Hela Skao');
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ }
+ assert.equal(await page.locator('#importHistory').innerText(),historyBefore);
  assert.equal(await page.locator('input[type=file]').count(),0);assert.equal(await page.evaluate(()=>localStorage.length+sessionStorage.length),0);
  await page.reload();await page.locator('[data-tab="forecast"]').click();assert.equal((await total())[0],'—');assert.match(await page.locator('#importHistory').innerText(),/Inga godkända/);assert.deepEqual(errors,[]);
  console.log('PASS: preview, validation, blocked errors, atomic replacement, period isolation, history, 120 report checks, unchanged budgets, drill-down, mobile, reload reset.');
