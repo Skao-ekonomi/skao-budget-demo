@@ -3,7 +3,7 @@
 Denna mapp innehåller en **fristående, klickbar HTML-demonstration** av budgetverktygets gränssnitt.
 
 - Öppna `index.html` i en webbläsare för att prova vyerna.
-- Alla uppgifter är **fiktiva**. Projektens övergripande kontrollsummor kommer från README:s fiktiva demofall; kostnadsställen och månadsfördelning är särskilt påhittade illustrationer.
+- Alla uppgifter är **fiktiva**. Alla belopp, kostnadsställen, projekt, konton och månadsfördelningar är påhittade illustrationer.
 - Ingen inloggning, databas, riktig filimport, budgetlagring eller Django-server används.
 - Den verkliga budgeten för 2026 ingår **inte**.
 - Denna commit **aktiverar inte GitHub Pages** och gör ingen publicering. Granska sidan och få uttryckligt godkännande innan publicering.
@@ -13,7 +13,7 @@ Detta är inte en ersättning för den fullständiga Django-appen.
 
 ## Utfall och prognos
 
-Fliken visar fem jämförelsekolumner för vald rapportmånad. Perioden är januari till och med vald månad, reståret är återstående månader. Prognos = ackumulerat utfall + budget reståret. Intäkter är positiva, kostnader negativa och summan visar resultat.
+Fliken visar sju jämförelsekolumner för vald rapportmånad. Perioden är januari till och med vald månad, reståret är återstående månader. Prognos = ackumulerat utfall + budget reståret. Intäkter är positiva, kostnader negativa och summan visar resultat.
 
 Välj rapportmånad, fiktivt underlag och **Förhandsgranska import**. Granska radantal, intäkter, kostnader, netto och fellista innan **Godkänn simulerad import**. Giltigt underlag och korrigerat utfall demonstrerar ersättning; felaktiga koder/kombinationer och dubbletter demonstrerar spärrat godkännande.
 
@@ -23,11 +23,11 @@ Kontrollerna omfattar giltiga konton, kostnadsställen, projekt, projektets fast
 
 Historiken visar godkännanden, period, radantal, netto och aktuell/ersatt version. Endast sidans minne används; omladdning tömmer utfall och historik. Budgetuppgifterna ändras inte och ingen bokföring finns att påverka. Ingen riktig filuppladdning, beständig lagring eller Fortnox-anslutning är aktiverad. Detta är en illustration av ett framtida importflöde, inte en implementation av Fortnox filformat. Använd inga verkliga uppgifter i demon.
 
-Klicka på rapportens rader: Hela Skao → kostnadsställe → projekt → konto. Sökvägens knappar tar dig tillbaka. Tabellen behåller alla fem beloppskolumner sida vid sida och kan rullas i sidled på små skärmar.
+Klicka på rapportens rader: Hela Skao → kostnadsställe → projekt → konto. Sökvägens knappar tar dig tillbaka. Tabellen behåller alla sju beloppskolumner sida vid sida och kan rullas i sidled på små skärmar.
 
 För lokal utveckling: `python3 -m http.server 8000 --bind 127.0.0.1` från projektmappen. Ingen installation eller byggprocess krävs.
 
-Rapportens beloppsrubriker är Utfall perioden, Budget perioden, Budget reståret, Prognos och Helårsbudget. Budget perioden + Budget reståret = Helårsbudget på varje rapportnivå. DEMO-3010 · Kursintäkter har hela sin fiktiva årsbudget, 3 000 kr, i september och 0 kr övriga månader. Augusti visar därför Budget 0 kr och Restbudget 3 000 kr; september visar Budget 3 000 kr och Restbudget 0 kr. Fördjupningen använder samma månadsbelopp som översikten.
+Rapportens beloppsrubriker är Utfall perioden, Budget perioden, Budget reståret, Prognos, Helårsbudget, Avvikelse och Avvikelse %. Budget perioden + Budget reståret = Helårsbudget på varje rapportnivå. DEMO-3010 · Kursintäkter har hela sin fiktiva årsbudget, 3 000 kr, i september och 0 kr övriga månader. Augusti visar därför Budget 0 kr och Restbudget 3 000 kr; september visar Budget 3 000 kr och Restbudget 0 kr. Fördjupningen använder samma månadsbelopp som översikten.
 
 ## Funktionstester
 
@@ -44,3 +44,5 @@ Den sjunde kolumnen, **Avvikelse %**, visar (Prognos − Helårsbudget) / absolu
 Rapportens detaljrader sorteras automatiskt efter Avvikelse i kronor, mest negativ först, sedan noll och positiva värden. Rader utan prognos/avvikelse ligger sist. Summaraden ligger alltid separat längst ned. Sorteringen gäller kostnadsställen, projekt och konton och ändrar inte budgetuppgifter eller importhistorik.
 
 Sökfältet **Sök kostnadsställe, projekt eller konto** söker i hela den fiktiva rapporthierarkin på nummer och namn oavsett stora/små bokstäver. Träffar visar nivå och sökväg och öppnar rätt rapportnivå. **Rensa sökning** tömmer träfflistan utan att ändra vald rapportnivå. Sökningen filtrerar inte rapporttabellen och påverkar inga belopp, summarader eller importer.
+
+Kompletterande kvalitetskontroll: `node tests/quality.cjs` använder oberoende fiktiva referensbelopp för samtliga sju kolumner, alla rapportnivåer och tolv månader. Den kontrollerar också månadsfliken, fem flikar vid 1366/1024/390/320 pixlar, tabellens överlappning och att inga externa nätverksanrop görs. Samma miljövariabler som för övriga tester stöds.
