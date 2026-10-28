@@ -27,10 +27,12 @@ Klicka på rapportens rader: Hela Skao → kostnadsställe → projekt → konto
 
 För lokal utveckling: `python3 -m http.server 8000 --bind 127.0.0.1` från projektmappen. Ingen installation eller byggprocess krävs.
 
-Rapportens beloppsrubriker är Utfall, Budget, Restbudget, Prognos och Helårsbudget. Budget + Restbudget = Helårsbudget på varje rapportnivå. DEMO-3010 · Kursintäkter har hela sin fiktiva årsbudget, 3 000 kr, i september och 0 kr övriga månader. Augusti visar därför Budget 0 kr och Restbudget 3 000 kr; september visar Budget 3 000 kr och Restbudget 0 kr. Fördjupningen använder samma månadsbelopp som översikten.
+Rapportens beloppsrubriker är Utfall perioden, Budget perioden, Budget reståret, Prognos och Helårsbudget. Budget perioden + Budget reståret = Helårsbudget på varje rapportnivå. DEMO-3010 · Kursintäkter har hela sin fiktiva årsbudget, 3 000 kr, i september och 0 kr övriga månader. Augusti visar därför Budget 0 kr och Restbudget 3 000 kr; september visar Budget 3 000 kr och Restbudget 0 kr. Fördjupningen använder samma månadsbelopp som översikten.
 
 ## Funktionstester
 
 Med den lokala servern igång och Node.js, Playwright samt Chromium tillgängliga: kör `node tests/demo.cjs`. `DEMO_URL` och `CHROMIUM_PATH` kan ange annan lokal testadress respektive Chromium-sökväg. Testet verifierar förhandsgranskning, valideringsfel, ersättning utan dubbelräkning, periodisolering, historik, oförändrade budgetuppgifter, rapportformler på alla nivåer och månader, fördjupning, mobilvy och återställning vid omladdning. Playwright behövs bara för tester, inte för att använda demon.
 
 Importflödet visar stegen **Välj underlag → Förhandsgranska → Kontrollera → Godkänn**. Underlagsval och förhandsgranskningsknapp ligger tillsammans. Fellistan grupperas per rad; text och färg skiljer stoppad import från godkända kontroller och godkänd import. Bekräftelsen visar aktuell import, period, intäkter, kostnader och netto. Historiken visar underlag och markerar aktuell version per period samt vilken import som ersatt äldre versioner.
+
+Knappen **Importera utfall (demo)** leder till den befintliga importsimuleringen. Den nya månadens ackumulerade utfall används i stället för föregående månads ackumulerade utfall i rapporten; perioderna adderas aldrig. Äldre perioder kan fortfarande väljas separat.

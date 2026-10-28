@@ -109,3 +109,5 @@ exampleSelect.addEventListener('change',invalidatePreview);
 document.getElementById('simulateImport').addEventListener('click',previewImport);
 approveButton.addEventListener('click',approveImport);
 renderReport();
+
+document.getElementById('openDemoImport').addEventListener('click',()=>{exampleSelect.scrollIntoView({behavior:'smooth',block:'center'});exampleSelect.focus({preventScroll:true});});

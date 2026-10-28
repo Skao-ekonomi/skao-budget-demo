@@ -7,7 +7,8 @@ const assert=require('node:assert/strict');
  const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(process.env.DEMO_URL||'http://127.0.0.1:8000/');
  for(const id of ['overview','centers','projects','months','forecast']){await page.locator(`[data-tab="${id}"]`).click();assert.equal(await page.locator('section:visible').getAttribute('id'),id);}
- assert.deepEqual(await page.locator('.report-table thead .num').allTextContents(),['Utfall','Budget','Restbudget','Prognos','Helårsbudget']);
+ assert.deepEqual(await page.locator('.report-table thead .num').allTextContents(),['Utfall perioden','Budget perioden','Budget reståret','Prognos','Helårsbudget']);
+ await page.getByRole('button',{name:'Importera utfall (demo)',exact:true}).click();assert.equal(await page.locator('#importExample').evaluate(e=>e===document.activeElement),true);
  const baseline=await page.evaluate(()=>JSON.stringify(reportRoot));
  const total=()=>page.locator('#reportTotal td').allTextContents();
  const approve=page.locator('#approveImport');
