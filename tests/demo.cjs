@@ -47,6 +47,30 @@ const assert=require('node:assert/strict');
   for(const [budget,actual,expected,sign] of [[-1000,-1320,'−32 %','negative'],[-1000,-680,'+32 %','positive'],[-1000,-1000,'0 %',''],[0,100,'—','']]){const fake={budget:[budget,...Array(11).fill(0)]};const snapshot=importSnapshots.get(Number(reportMonth.value));snapshot.amounts.set(fake,actual);const cell=reportCells(fake)[6];snapshot.amounts.delete(fake);if(cell.textContent!==expected)throw Error('Percent example: '+cell.textContent);if(cell.classList.contains('variance-negative')!==(sign==='negative')||cell.classList.contains('variance-positive')!==(sign==='positive'))throw Error('Percent color');}
   const saved=importedMonth;importedMonth=null;visit(root,[root]);if([...document.querySelectorAll('#reportRows tr,#reportTotal tr')].some(r=>r.lastElementChild.textContent!=='—'))throw Error('Missing forecast');importedMonth=saved;reportPath=[root];renderReport();return checked;
  });assert(varianceChecks>20);assert.equal(await page.locator('#importHistory').innerText(),historyBefore);
+ const sortingChecks=await page.evaluate(()=>{
+  const mixed=[null,20,0,-2,100,-100,null,0];mixed.sort(compareReportVariances);
+  if(JSON.stringify(mixed)!==JSON.stringify([-100,-2,0,0,20,100,null,null]))throw Error('Mixed missing/negative/zero/positive order');
+  const originalPath=reportPath,originalMonth=reportMonth.value,originalImported=importedMonth;
+  const root={label:'Rapport',children:[reportRoot]};let checked=0;
+  function visit(node,path){
+   reportPath=path;renderReport();
+   const rows=[...document.querySelectorAll('#reportRows tr')];
+   const values=rows.map(row=>{const text=row.querySelectorAll('td')[5].textContent;return text==='—'?null:Number(text.replace(/[^0-9−+-]/g,'').replace('−','-'));});
+   for(let i=1;i<values.length;i++){if(compareReportVariances(values[i-1],values[i])>0)throw Error('Wrong order on '+node.label);}
+   if(document.querySelectorAll('#reportTotal tr').length!==1||document.querySelector('#reportTotal').parentElement.lastElementChild.id!=='reportTotal')throw Error('Summary moved');
+   const cells=reportCells(node);if([...document.querySelectorAll('#reportTotal td')].some((cell,i)=>cell.textContent!==cells[i].textContent))throw Error('Summary changed');
+   checked++;
+   if(node.children)node.children.forEach(child=>visit(child,[...path,child]));
+  }
+  for(let month=0;month<12;month++){reportMonth.value=String(month);importedMonth=month;visit(root,[root]);}
+  importedMonth=null;visit(root,[root]);
+  reportMonth.value=originalMonth;importedMonth=originalImported;reportPath=originalPath;renderReport();return checked;
+ });assert.equal(sortingChecks,143);assert.equal(await page.locator('#importHistory').innerText(),historyBefore);assert.equal(await page.evaluate(()=>JSON.stringify(reportRoot)),baseline);
+ // Follow a sorted row by its label, then navigate back through the breadcrumbs.
+ await page.getByRole('button',{name:'Hela Skao →',exact:true}).click();
+ const firstLabel=(await page.locator('#reportRows button').first().innerText()).replace(' →','');
+ await page.locator('#reportRows button').first().click();assert.equal(await page.locator('#reportHeading').innerText(),firstLabel);
+ await page.locator('#reportPath button').filter({hasText:'Hela Skao'}).click();assert.equal(await page.locator('#reportHeading').innerText(),'Hela Skao');
  await page.setViewportSize({width:1366,height:900});
  const layout=await page.locator('.report-table').evaluate(e=>({width:e.clientWidth,available:e.parentElement.clientWidth}));assert(layout.width<=layout.available);
  await page.setViewportSize({width:390,height:844});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.equal(await page.locator('.report-scroll').last().evaluate(e=>e.scrollWidth>e.clientWidth),true);

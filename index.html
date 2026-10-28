@@ -42,6 +42,7 @@
 <p>Klicka på en rad för att gå från hela Skao till kostnadsställe, projekt och konto. Använd sökvägen för att gå tillbaka.</p>
 <nav id="reportPath" class="breadcrumbs" aria-label="Rapportens sökväg"></nav>
 <h3 id="reportHeading" tabindex="-1"></h3>
+<p>Största negativa avvikelser visas först. Rader utan prognos visas sist.</p>
 <div class="report-scroll" role="region" aria-label="Rapporttabell, rulla i sidled på mindre skärmar" tabindex="0"><table class="report-table"><caption id="reportCaption"></caption><colgroup><col><col class="amount" span="7"></colgroup><thead><tr><th scope="col">Rapportnivå</th><th scope="col" class="num">Utfall perioden</th><th scope="col" class="num">Budget perioden</th><th scope="col" class="num">Budget reståret</th><th scope="col" class="num">Prognos</th><th scope="col" class="num">Helårsbudget</th><th scope="col" class="num">Avvikelse</th><th scope="col" class="num">Avvikelse %</th></tr></thead><tbody id="reportRows"></tbody><tfoot id="reportTotal"></tfoot></table></div>
 <p class="muted">Helårsbudgeten är samma fiktiva budget som i övriga flikar: intäkter 3 000 kr, kostnader 4 000 kr och resultat −1 000 kr. Prognosen använder budget för återstående månader utan andra justeringar.</p>
 </div></section>
@@ -82,6 +83,11 @@ function reportCells(node){
   return cell;
  });
 }
+function compareReportVariances(a,b){
+ const aMissing=a===null||!Number.isFinite(a),bMissing=b===null||!Number.isFinite(b);
+ if(aMissing||bMissing)return aMissing===bMissing?0:aMissing?1:-1;
+ return a-b;
+}
 function renderReport(){
  const node=reportPath[reportPath.length-1];
  document.getElementById('importStatus').textContent=importedMonth===null?'Inget utfall laddat för januari–'+names[Number(reportMonth.value)]+'. Förhandsgranska och godkänn en simulering för att se utfall och prognos.':'Fiktivt ackumulerat utfall laddat för januari–'+names[importedMonth]+'. En ny simulering ersätter samma exempeldata.';
@@ -91,7 +97,10 @@ function renderReport(){
  document.getElementById('reportCaption').textContent='Fiktiv rapport · Januari–'+names[Number(reportMonth.value)]+' · kr';
  const body=document.getElementById('reportRows');body.replaceChildren();
  // Start with the whole organisation, then reveal one level on each click.
- const rows=node.children||[node];
+ const rows=(node.children||[node]).map(child=>{
+  const amounts=reportAmounts(child);
+  return {child,variance:importedMonth===null?null:amounts[3]-amounts[4]};
+ }).sort((a,b)=>compareReportVariances(a.variance,b.variance)).map(item=>item.child);
  rows.forEach(child=>{const row=document.createElement('tr');const label=document.createElement('th');label.scope='row';
  if(child.children||node.children){row.dataset.child='true';const button=document.createElement('button');button.type='button';button.className='row-link';button.textContent=child.label+' →';label.appendChild(button);row.addEventListener('click',()=>{reportPath.push(child);renderReport();document.getElementById('reportHeading').focus();});}else{label.textContent=child.label+' · kontonivå';}
  row.append(label,...reportCells(child));body.appendChild(row);});

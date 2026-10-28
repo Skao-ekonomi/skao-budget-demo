@@ -40,3 +40,5 @@ Knappen **Importera utfall (demo)** leder till den befintliga importsimuleringen
 Rapporten har även en sjätte beloppskolumn, **Avvikelse = Prognos − Helårsbudget**, på alla nivåer och summarader. Negativa värden är röda, positiva gröna med plustecken och noll neutralt. Saknad prognos ger streck även i Avvikelse. Tabellen kan rullas i sidled på mobil.
 
 Den sjunde kolumnen, **Avvikelse %**, visar (Prognos − Helårsbudget) / absolutbeloppet av Helårsbudget × 100 med högst en decimal. Saknad prognos eller nollbudget visas som —. Negativt är rött, positivt grönt och noll neutralt.
+
+Rapportens detaljrader sorteras automatiskt efter Avvikelse i kronor, mest negativ först, sedan noll och positiva värden. Rader utan prognos/avvikelse ligger sist. Summaraden ligger alltid separat längst ned. Sorteringen gäller kostnadsställen, projekt och konton och ändrar inte budgetuppgifter eller importhistorik.
